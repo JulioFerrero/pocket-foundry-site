@@ -1,0 +1,29 @@
+---
+import Sheet from '../layouts/Sheet.astro';
+import { useTranslations } from '../i18n';
+
+const { t, list } = useTranslations(Astro.currentLocale);
+const items = list<{ q: string; a: string }>('faq.items');
+const structured = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: { '@type': 'Answer', text: item.a },
+    })),
+  },
+];
+---
+<Sheet title={t('faq.title')} description={t('faq.description')} sheet="faq" structured={structured}>
+  <h1>{t('faq.heading')}</h1>
+  <div class="faq">
+    {items.map((item) => (
+      <section>
+        <h2>{item.q}</h2>
+        <p>{item.a}</p>
+      </section>
+    ))}
+  </div>
+</Sheet>

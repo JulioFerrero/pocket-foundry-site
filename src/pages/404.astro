@@ -1,0 +1,12 @@
+---
+import Sheet from '../layouts/Sheet.astro';
+import { useTranslations } from '../i18n';
+
+const { t } = useTranslations(Astro.currentLocale);
+---
+<Sheet title={t('notFound.title')} description={t('notFound.description')} sheet={null}>
+  <meta slot="head" name="robots" content="noindex" />
+  <h1>{t('notFound.heading')}</h1>
+  <p class="lead">{t('notFound.lead')}</p>
+  <p><a href="/">{t('notFound.back')}</a></p>
+</Sheet>

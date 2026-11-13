@@ -1,0 +1,314 @@
+[
+  {
+    "phone": "vivo X200 Ultra",
+    "gpu": "Adreno 830",
+    "driver": "Turnip",
+    "notes": "60",
+    "issues": []
+  },
+  {
+    "phone": "Galaxy S25 Ultra",
+    "gpu": "Adreno 830",
+    "driver": "Turnip",
+    "notes": "60",
+    "issues": [
+      69
+    ]
+  },
+  {
+    "phone": "OnePlus 15",
+    "gpu": "Adreno 840",
+    "driver": "Turnip",
+    "notes": "",
+    "issues": []
+  },
+  {
+    "phone": "Galaxy S24 Ultra",
+    "gpu": "Adreno 750",
+    "driver": "Turnip",
+    "notes": "",
+    "issues": []
+  },
+  {
+    "phone": "Galaxy S23",
+    "gpu": "Adreno 740",
+    "driver": "Turnip",
+    "notes": "60",
+    "issues": []
+  },
+  {
+    "phone": "Xiaomi 13",
+    "gpu": "Adreno 740",
+    "driver": "Turnip",
+    "notes": "",
+    "issues": []
+  },
+  {
+    "phone": "AYN Thor",
+    "gpu": "Adreno 740",
+    "driver": "Turnip",
+    "notes": "60 on a big factory",
+    "issues": []
+  },
+  {
+    "phone": "POCO F5 Pro",
+    "gpu": "Adreno 730",
+    "driver": "Turnip",
+    "notes": "60",
+    "issues": [
+      20
+    ]
+  },
+  {
+    "phone": "Galaxy Z Fold 8 Ultra",
+    "gpu": "Adreno",
+    "driver": "Turnip",
+    "notes": "Folded and unfolded",
+    "issues": []
+  },
+  {
+    "phone": "Retroid Pocket Flip 2",
+    "gpu": "Adreno 650",
+    "driver": "Turnip",
+    "notes": "",
+    "issues": []
+  },
+  {
+    "phone": "Galaxy S20 FE",
+    "gpu": "Adreno 650",
+    "driver": "Turnip",
+    "notes": "",
+    "issues": [
+      12
+    ]
+  },
+  {
+    "phone": "Redmi Note 10 Pro",
+    "gpu": "Adreno 618",
+    "driver": "Turnip",
+    "notes": "",
+    "issues": [
+      17
+    ]
+  },
+  {
+    "phone": "Nothing Phone (1)",
+    "gpu": "Adreno 642L",
+    "driver": "Freedreno",
+    "notes": "",
+    "issues": []
+  },
+  {
+    "phone": "POCO X5 Pro 5G",
+    "gpu": "Adreno 642L",
+    "driver": "Freedreno",
+    "notes": "",
+    "issues": [
+      36
+    ]
+  },
+  {
+    "phone": "Galaxy S25 FE",
+    "gpu": "Xclipse 940",
+    "driver": "RADV for Xclipse",
+    "notes": "60",
+    "issues": [
+      18
+    ]
+  },
+  {
+    "phone": "Galaxy A56",
+    "gpu": "Xclipse 540",
+    "driver": "RADV for Xclipse",
+    "notes": "54–59",
+    "issues": [
+      62
+    ]
+  },
+  {
+    "phone": "realme 16 Pro",
+    "gpu": "Mali-G615",
+    "driver": "PanVK-kbase 26.3.1",
+    "notes": "60, High sprites",
+    "issues": [
+      35
+    ]
+  },
+  {
+    "phone": "Xiaomi 14T",
+    "gpu": "Mali-G615",
+    "driver": "PanVK-kbase 26.3.1",
+    "notes": "46–59, High sprites",
+    "issues": []
+  },
+  {
+    "phone": "Poco X6 Pro",
+    "gpu": "Mali-G615",
+    "driver": "Phone's driver",
+    "notes": "60",
+    "issues": [
+      10
+    ]
+  },
+  {
+    "phone": "Tecno Camon 50 Ultra",
+    "gpu": "Mali-G615",
+    "driver": "MobileGlues",
+    "notes": "60",
+    "issues": [
+      76
+    ]
+  },
+  {
+    "phone": "Xiaomi 11T",
+    "gpu": "Mali-G77",
+    "driver": "PanVK-kbase RC3",
+    "notes": "60, High sprites",
+    "issues": [
+      55
+    ]
+  },
+  {
+    "phone": "Galaxy S20",
+    "gpu": "Mali-G77",
+    "driver": "PanVK-kbase RC3",
+    "notes": "37–45",
+    "issues": []
+  },
+  {
+    "phone": "Pixel 6",
+    "gpu": "Mali-G78",
+    "driver": "PanVK-kbase RC3",
+    "notes": "Medium sprites",
+    "issues": [
+      11
+    ]
+  },
+  {
+    "phone": "Huawei P30",
+    "gpu": "Mali-G76",
+    "driver": "PanVK 1.2.9",
+    "notes": "60",
+    "issues": [
+      56
+    ]
+  },
+  {
+    "phone": "Galaxy S10",
+    "gpu": "Mali-G76",
+    "driver": "PanVK 1.2.9",
+    "notes": "17–37",
+    "issues": []
+  },
+  {
+    "phone": "Pixel 8",
+    "gpu": "Mali-G715",
+    "driver": "Phone's driver",
+    "notes": "60, Medium sprites",
+    "issues": [
+      13
+    ]
+  },
+  {
+    "phone": "Xiaomi 15T Pro",
+    "gpu": "Mali-G925",
+    "driver": "Phone's driver",
+    "notes": "60, Medium sprites",
+    "issues": [
+      2
+    ]
+  },
+  {
+    "phone": "OnePlus Nord 3 5G",
+    "gpu": "Mali-G710",
+    "driver": "Phone's driver",
+    "notes": "About 40, High sprites",
+    "issues": [
+      30
+    ]
+  },
+  {
+    "phone": "Redmi Note 13 Pro+",
+    "gpu": "Mali-G610",
+    "driver": "Phone's driver",
+    "notes": "30–46, Medium sprites",
+    "issues": [
+      27
+    ]
+  },
+  {
+    "phone": "Galaxy A54",
+    "gpu": "Mali-G68",
+    "driver": "Phone's driver",
+    "notes": "60",
+    "issues": [
+      64
+    ]
+  },
+  {
+    "phone": "Poco M6 Pro 4G",
+    "gpu": "Mali-G57",
+    "driver": "Phone's driver",
+    "notes": "50–60",
+    "issues": [
+      51
+    ]
+  },
+  {
+    "phone": "Galaxy XCover7",
+    "gpu": "Mali-G57",
+    "driver": "MobileGlues",
+    "notes": "55–60",
+    "issues": []
+  },
+  {
+    "phone": "Galaxy Tab S6 Lite",
+    "gpu": "Mali-G72",
+    "driver": "Phone's driver",
+    "notes": "29–60, Medium sprites",
+    "issues": [
+      59
+    ]
+  },
+  {
+    "phone": "Infinix Hot 60i",
+    "gpu": "Mali-G52",
+    "driver": "Phone's driver",
+    "notes": "35–52, Medium sprites",
+    "issues": [
+      1
+    ]
+  },
+  {
+    "phone": "Redmi 12C",
+    "gpu": "Mali-G52",
+    "driver": "Phone's driver",
+    "notes": "30–50",
+    "issues": [
+      71
+    ]
+  },
+  {
+    "phone": "Redmi 12",
+    "gpu": "Mali-G52",
+    "driver": "MobileGlues",
+    "notes": "45–60",
+    "issues": []
+  },
+  {
+    "phone": "Redmi Note 9",
+    "gpu": "Mali-G52",
+    "driver": "PanVK 1.2.9",
+    "notes": "25–32",
+    "issues": [
+      21
+    ]
+  },
+  {
+    "phone": "Pixel 10 Pro",
+    "gpu": "PowerVR",
+    "driver": "Phone's driver",
+    "notes": "58–60, High sprites",
+    "issues": []
+  }
+]

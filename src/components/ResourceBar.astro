@@ -1,0 +1,22 @@
+---
+/** The strategy game's resource bar: what Pocket Foundry has, as counters. */
+import { useTranslations } from '../i18n';
+import release from '../data/release.json';
+import phones from '../data/phones.json';
+
+const { t } = useTranslations(Astro.currentLocale);
+const counters = [
+  { label: t('resources.version'), value: release.version },
+  { label: t('resources.phones'), value: String(new Set(phones.map((row) => row.phone)).size) },
+  { label: t('resources.licence'), value: t('site.licence') },
+  { label: t('resources.price'), value: t('resources.free') },
+];
+---
+<dl class="resources">
+  {counters.map((counter) => (
+    <div class="resource">
+      <dt>{counter.label}</dt>
+      <dd>{counter.value}</dd>
+    </div>
+  ))}
+</dl>

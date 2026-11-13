@@ -1,0 +1,23 @@
+---
+/** The sheets of the drawing, as the minimap: the site's navigation. */
+import { useTranslations } from '../i18n';
+import { sheets, type SheetId } from '../sheets';
+
+interface Props {
+  current: SheetId | null;
+}
+const { current } = Astro.props;
+const { t } = useTranslations(Astro.currentLocale);
+---
+<nav class="sheets" aria-label={t('a11y.nav')}>
+  <ol>
+    {sheets.map((sheet, index) => (
+      <li>
+        <a class="sel" href={sheet.path} data-tip={`${t('sheet.label')} ${index + 1} ${t('sheet.of')} ${sheets.length}`} aria-current={sheet.id === current ? 'page' : undefined}>
+          <span class="sheet-number">{index + 1}</span>
+          <span>{t(sheet.nav)}</span>
+        </a>
+      </li>
+    ))}
+  </ol>
+</nav>

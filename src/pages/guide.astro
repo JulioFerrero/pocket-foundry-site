@@ -1,0 +1,25 @@
+---
+import { marked } from 'marked';
+import Sheet from '../layouts/Sheet.astro';
+import { useTranslations } from '../i18n';
+import guideEn from '../content/guide.en.md?raw';
+
+const { t, locale } = useTranslations(Astro.currentLocale);
+const guides: Record<string, string> = { en: guideEn };
+
+// The guide is the app's docs/playing.md (scripts/fetch-data.mjs); the sheet's heading replaces its title.
+const slug = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const renderer = new marked.Renderer();
+renderer.heading = ({ tokens, depth }) => {
+  const text = renderer.parser.parseInline(tokens);
+  const level = Math.min(depth, 6);
+  return `<h${level} id="${slug(text.replace(/<[^>]+>/g, ''))}">${text}</h${level}>\n`;
+};
+const body = (guides[locale] ?? guideEn).replace(/^# .*\n+/, '');
+const html = await marked.parse(body, { renderer });
+---
+<Sheet title={t('guide.title')} description={t('guide.description')} sheet="guide">
+  <h1>{t('guide.heading')}</h1>
+  <p class="lead">{t('guide.lead')}</p>
+  <article class="prose" set:html={html} />
+</Sheet>

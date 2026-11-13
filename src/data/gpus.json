@@ -1,0 +1,30 @@
+[
+  {
+    "gpu": "Adreno 6xx and newer (Snapdragon)",
+    "driver": "Turnip"
+  },
+  {
+    "gpu": "Mali-G615",
+    "driver": "PanVK-kbase 26.3.1"
+  },
+  {
+    "gpu": "Mali-G77, G78",
+    "driver": "PanVK-kbase RC3"
+  },
+  {
+    "gpu": "Mali-G76",
+    "driver": "PanVK 1.2.9"
+  },
+  {
+    "gpu": "Xclipse (Samsung Exynos)",
+    "driver": "RADV for Xclipse"
+  },
+  {
+    "gpu": "Other Malis, PowerVR and other GPUs with Vulkan 1.1",
+    "driver": "The Phone's driver"
+  },
+  {
+    "gpu": "GPUs without Vulkan 1.1 (Adreno 5xx and older)",
+    "driver": "MobileGlues"
+  }
+]

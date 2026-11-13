@@ -1,0 +1,58 @@
+---
+import { useTranslations, dictionaries } from '../i18n';
+import release from '../data/release.json';
+
+interface Props {
+  title: string;
+  description: string;
+  structured?: Record<string, unknown>[];
+}
+const { title, description, structured = [] } = Astro.props;
+const { t } = useTranslations(Astro.currentLocale);
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const imageUrl = new URL('/og.png', Astro.site);
+const site = new URL('/', Astro.site);
+const data = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: t('site.name'),
+    url: site.href,
+    inLanguage: Astro.currentLocale,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: t('site.name'),
+    description: t('site.description'),
+    url: site.href,
+    image: new URL('/icon-512.png', Astro.site).href,
+    operatingSystem: 'Android 10+',
+    applicationCategory: 'GameApplication',
+    softwareVersion: release.version,
+    downloadUrl: release.apk,
+    license: 'https://www.gnu.org/licenses/gpl-3.0.html',
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
+  },
+  ...structured,
+];
+---
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical.href} />
+{Object.keys(dictionaries).map((lang) => <link rel="alternate" hreflang={lang} href={canonical.href} />)}
+<link rel="alternate" hreflang="x-default" href={canonical.href} />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={t('site.name')} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical.href} />
+<meta property="og:image" content={imageUrl.href} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:locale" content={Astro.currentLocale} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageUrl.href} />
+<script type="application/ld+json" set:html={JSON.stringify(data)} />

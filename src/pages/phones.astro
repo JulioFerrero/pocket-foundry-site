@@ -1,0 +1,86 @@
+---
+import Sheet from '../layouts/Sheet.astro';
+import { useTranslations } from '../i18n';
+import { links } from '../links';
+import gpus from '../data/gpus.json';
+import phones from '../data/phones.json';
+
+const { t } = useTranslations(Astro.currentLocale);
+---
+<Sheet title={t('phones.title')} description={t('phones.description')} sheet="phones">
+  <h1>{t('phones.heading')}</h1>
+  <p class="lead">{t('phones.lead')}</p>
+
+  <section aria-labelledby="gpus-heading">
+    <h2 id="gpus-heading">{t('phones.gpus.heading')}</h2>
+    <table>
+      <thead><tr><th scope="col">{t('phones.gpus.gpu')}</th><th scope="col">{t('phones.gpus.driver')}</th></tr></thead>
+      <tbody>{gpus.map((row) => <tr><th scope="row">{row.gpu}</th><td>{row.driver}</td></tr>)}</tbody>
+    </table>
+    <p>{t('phones.gpus.fallback')}</p>
+  </section>
+
+  <section aria-labelledby="list-heading">
+    <h2 id="list-heading">{t('phones.list.heading')}</h2>
+    <p>{t('phones.list.source')}</p>
+    <div class="search" hidden>
+      <label for="phone-search">{t('phones.list.search')}</label>
+      <input id="phone-search" type="search" autocomplete="off" placeholder={t('phones.list.placeholder')} />
+      <p class="search-count" role="status" aria-live="polite"
+         data-template={t('phones.list.count', { shown: '{shown}', total: '{total}' })}></p>
+    </div>
+    <table class="phones">
+      <thead>
+        <tr>
+          <th scope="col">{t('phones.list.phone')}</th>
+          <th scope="col">{t('phones.list.gpu')}</th>
+          <th scope="col">{t('phones.list.driver')}</th>
+          <th scope="col">{t('phones.list.notes')}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {phones.map((row) => (
+          <tr data-search={`${row.phone} ${row.gpu} ${row.driver}`.toLowerCase()}>
+            <th scope="row">{row.phone}</th>
+            <td>{row.gpu}</td>
+            <td>{row.driver}</td>
+            <td>
+              {row.notes}
+              {row.issues.map((number) => (
+                <> <a href={links.issue(number)}>{t('phones.list.issue', { number })}</a></>
+              ))}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p class="search-empty" hidden>{t('phones.list.empty')}</p>
+    <p><a href={links.issues}>{t('phones.report')}</a></p>
+  </section>
+</Sheet>
+
+<script>
+  // The table works without this; with it, the search box filters the rows as you type.
+  const box = document.querySelector<HTMLElement>('.search');
+  const input = document.querySelector<HTMLInputElement>('#phone-search');
+  const count = document.querySelector<HTMLElement>('.search-count');
+  const empty = document.querySelector<HTMLElement>('.search-empty');
+  const rows = [...document.querySelectorAll<HTMLTableRowElement>('table.phones tbody tr')];
+  if (box && input && count && empty) {
+    box.hidden = false;
+    const template = count.dataset.template ?? '';
+    const update = () => {
+      const words = input.value.toLowerCase().split(/\s+/).filter(Boolean);
+      let shown = 0;
+      for (const row of rows) {
+        const match = words.every((word) => (row.dataset.search ?? '').includes(word));
+        row.hidden = !match;
+        if (match) shown++;
+      }
+      count.textContent = template.replace('{shown}', String(shown)).replace('{total}', String(rows.length));
+      empty.hidden = shown > 0;
+    };
+    input.addEventListener('input', update);
+    update();
+  }
+</script>

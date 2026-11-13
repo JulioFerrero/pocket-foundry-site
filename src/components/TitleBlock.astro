@@ -1,0 +1,19 @@
+---
+/** A drawing's title block: which sheet this is, of how many, and the revision (the app's version). */
+import { useTranslations } from '../i18n';
+import { sheets, sheetNumber, type SheetId } from '../sheets';
+import release from '../data/release.json';
+
+interface Props {
+  sheet: SheetId;
+}
+const { sheet } = Astro.props;
+const { t } = useTranslations(Astro.currentLocale);
+const name = t(sheets[sheetNumber(sheet) - 1].nav);
+---
+<dl class="title-block">
+  <div><dt>{t('sheet.drawing')}</dt><dd>{t('site.name')} · {name}</dd></div>
+  <div><dt>{t('sheet.label')}</dt><dd>{sheetNumber(sheet)} {t('sheet.of')} {sheets.length}</dd></div>
+  <div><dt>{t('sheet.scale')}</dt><dd>{t('sheet.scaleValue')}</dd></div>
+  <div><dt>{t('sheet.rev')}</dt><dd>{release.version}</dd></div>
+</dl>

@@ -1,0 +1,37 @@
+---
+import { useTranslations } from '../i18n';
+import { links } from '../links';
+
+const { t } = useTranslations(Astro.currentLocale);
+// The 88x31 buttons (art/badges.mjs): the stills are for people who turn animations off.
+const badges = [
+  { name: 'pocket-foundry', label: t('badges.pocketFoundry'), href: '/' },
+  { name: 'no-emulation', label: t('badges.noEmulation') },
+  { name: 'gpl', label: t('badges.gpl'), href: links.licence },
+  { name: 'android', label: t('badges.android') },
+  { name: 'obtainium', label: t('badges.obtainium'), href: links.obtainium },
+  { name: 'fps', label: t('badges.fps') },
+  { name: 'blender', label: t('badges.blender'), href: 'https://www.blender.org/' },
+  { name: 'no-tracking', label: t('badges.noTracking') },
+];
+---
+<footer class="footer">
+  <ul class="badges" aria-label={t('badges.heading')}>
+    {badges.map((badge) => {
+      const image = (
+        <picture>
+          <source srcset={`/badges/${badge.name}.png`} media="(prefers-reduced-motion: reduce)" />
+          <img src={`/badges/${badge.name}.gif`} width="88" height="31" alt={badge.label} loading="lazy" decoding="async" />
+        </picture>
+      );
+      return <li>{badge.href ? <a href={badge.href}>{image}</a> : image}</li>;
+    })}
+  </ul>
+  <p>{t('site.unofficial')}</p>
+  <ul class="footer-links">
+    <li><a href={links.repo}>{t('site.source')}</a></li>
+    <li><a href={links.releases}>{t('footer.releases')}</a></li>
+    <li><a href={links.issues}>{t('footer.issues')}</a></li>
+    <li><a href={links.licence}>{t('site.licence')}</a></li>
+  </ul>
+</footer>

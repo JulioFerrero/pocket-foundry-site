@@ -1,0 +1,137 @@
+---
+import { Picture, getImage } from 'astro:assets';
+import Sheet from '../layouts/Sheet.astro';
+import { useTranslations } from '../i18n';
+import { links } from '../links';
+import release from '../data/release.json';
+import playing from '../assets/screens/1-playing.jpg';
+import home from '../assets/screens/2-home.jpg';
+import importing from '../assets/screens/3-importing.jpg';
+import driver from '../assets/screens/5-driver.jpg';
+
+const { t, list } = useTranslations(Astro.currentLocale);
+// Each step's sprite, from art/sprites.py and art/encode_sprites.mjs, in the order of home.steps.items.
+const steps = list<{ title: string; text: string }>('home.steps.items').map((step, index) => ({
+  ...step,
+  sprite: ['install', 'import', 'play'][index],
+}));
+const screens = await Promise.all(
+  [
+    { image: playing, alt: t('home.screens.playing') },
+    { image: home, alt: t('home.screens.home') },
+    { image: importing, alt: t('home.screens.importing') },
+    { image: driver, alt: t('home.screens.driver') },
+  ].map(async (screen) => ({ ...screen, full: (await getImage({ src: screen.image, width: 1200, format: 'webp' })).src })),
+);
+---
+<Sheet title={t('home.title')} description={t('home.description')} sheet="home">
+  <div class="front">
+    <section class="hero" aria-labelledby="hero-heading">
+      <h1 id="hero-heading">{t('home.heading')}</h1>
+      <p class="lead">{t('home.lead')}</p>
+    </section>
+
+    <section class="downloads panel" aria-labelledby="downloads-heading">
+      <h2 id="downloads-heading">{t('home.download.heading')}</h2>
+      <ul>
+        <li>
+          <a class="button primary sel" href={release.apk}>
+            <span>{t('home.download.github')}</span>
+            <small>{t('home.download.githubNote', { version: release.version })}</small>
+          </a>
+        </li>
+        <li>
+          <a class="button obtainium sel" href={links.obtainium}>
+            <span>{t('home.download.obtainium')}</span>
+            <small>{t('home.download.obtainiumNote')}</small>
+          </a>
+        </li>
+      </ul>
+      <p class="requires">{t('home.download.requires')}</p>
+    </section>
+  </div>
+
+  <section class="steps" aria-labelledby="steps-heading">
+    <h2 id="steps-heading">{t('home.steps.heading')}</h2>
+    <ol>
+      {steps.map((step) => (
+        <li>
+          <span class="sprite" data-name={step.sprite}>
+            <img src={`/sprites/${step.sprite}-still-220.webp`} alt="" width="220" height="200" loading="lazy" decoding="async"
+                 srcset={`/sprites/${step.sprite}-still-220.webp 220w, /sprites/${step.sprite}-still-440.webp 440w`}
+                 sizes="(min-width: 40rem) 11rem, 6.5rem" />
+            <video muted loop playsinline preload="none" aria-hidden="true" tabindex="-1" width="220" height="200"></video>
+          </span>
+          <p><strong>{step.title}</strong>{step.text}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="screens" aria-labelledby="screens-heading">
+    <h2 id="screens-heading">{t('home.screens.heading')}</h2>
+    <ul>
+      {screens.map((screen) => (
+        <li>
+          <figure>
+            <a class="shot" href={screen.full} aria-label={`${t('home.screens.open')}: ${screen.alt}`} data-alt={screen.alt}>
+              <Picture src={screen.image} alt="" formats={['avif', 'webp']} widths={[400, 800, 1200]}
+                       sizes="(min-width: 60rem) 380px, (min-width: 40rem) 340px, 100vw" loading="lazy" />
+            </a>
+            <figcaption>{screen.alt}</figcaption>
+          </figure>
+        </li>
+      ))}
+    </ul>
+    <!-- Without the script below, the links open the image itself. -->
+    <dialog class="lightbox" aria-label={t('home.screens.heading')}>
+      <img alt="" width="1200" height="545" />
+      <form method="dialog"><button class="button">{t('home.screens.close')}</button></form>
+    </dialog>
+  </section>
+</Sheet>
+
+<script>
+  // Screenshots open bigger in a dialog, which a click on the backdrop also closes.
+  const lightbox = document.querySelector<HTMLDialogElement>('dialog.lightbox');
+  const big = lightbox?.querySelector('img');
+  let opener: HTMLElement | null = null;
+  for (const link of document.querySelectorAll<HTMLAnchorElement>('a.shot')) {
+    link.addEventListener('click', (event) => {
+      if (!lightbox || !big || typeof lightbox.showModal !== 'function') return;
+      event.preventDefault();
+      opener = link;
+      big.src = link.href;
+      big.alt = link.dataset.alt ?? '';
+      lightbox.showModal();
+    });
+  }
+  lightbox?.addEventListener('click', (event) => {
+    if (event.target === lightbox) lightbox.close();
+  });
+  lightbox?.addEventListener('close', () => opener?.focus());
+
+  // How it works' loops: Safari plays HEVC with transparency, the others VP9. Each starts once the page has loaded
+  // (so the text paints first) and it comes into view, and none does for people who turn animations off.
+  const safari = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent);
+  const calm = matchMedia('(prefers-reduced-motion: reduce)');
+  const startLoops = () => {
+    const seen = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const box = entry.target as HTMLElement;
+        seen.unobserve(box);
+        const video = box.querySelector('video');
+        if (!video) continue;
+        video.src = `/sprites/${box.dataset.name}.${safari ? 'mp4' : 'webm'}`;
+        video.addEventListener('playing', () => box.classList.add('playing'), { once: true });
+        video.play().catch(() => {});
+      }
+    }, { rootMargin: '200px' });
+    document.querySelectorAll<HTMLElement>('.sprite').forEach((box) => seen.observe(box));
+  };
+  if (!calm.matches && 'IntersectionObserver' in window) {
+    if (document.readyState === 'complete') startLoops();
+    else addEventListener('load', startLoops, { once: true });
+  }
+</script>

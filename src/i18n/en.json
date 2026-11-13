@@ -1,0 +1,175 @@
+{
+  "site": {
+    "name": "Pocket Foundry",
+    "description": "A free, open-source launcher that runs the Linux version of Factorio on Android phones.",
+    "unofficial": "Pocket Foundry is not made by or affiliated with Wube Software. Factorio is a trademark of Wube Software.",
+    "licence": "GPL-3.0",
+    "source": "Source code on GitHub"
+  },
+  "a11y": {
+    "skip": "Skip to content",
+    "nav": "Sheets"
+  },
+  "nav": {
+    "home": "Home",
+    "phones": "Phones",
+    "guide": "Guide",
+    "faq": "FAQ"
+  },
+  "sheet": {
+    "label": "Sheet",
+    "of": "of",
+    "rev": "Rev",
+    "drawing": "Drawing",
+    "scale": "Scale",
+    "scaleValue": "1:1"
+  },
+  "resources": {
+    "version": "Version",
+    "phones": "Phones that play",
+    "licence": "Licence",
+    "price": "Price",
+    "free": "Free"
+  },
+  "home": {
+    "title": "Pocket Foundry: Factorio on Android",
+    "description": "Pocket Foundry is a free Android launcher that runs the Linux ARM64 version of Factorio, the full game or the free demo, on the phone's GPU.",
+    "heading": "Factorio on Android",
+    "lead": "Pocket Foundry runs the Linux ARM64 version of Factorio on your phone. Import the full game or the free demo from factorio.com, and the app sets up the rest.",
+    "download": {
+      "heading": "Get the app",
+      "github": "Download the APK",
+      "githubNote": "{version}, from GitHub",
+      "obtainium": "Get it with Obtainium",
+      "obtainiumNote": "Installs updates for you",
+      "requires": "Android 10 or later."
+    },
+    "steps": {
+      "heading": "How it works",
+      "items": [
+        {
+          "title": "Install",
+          "text": "Download the APK, or add Pocket Foundry to Obtainium."
+        },
+        {
+          "title": "Import your Factorio",
+          "text": "Download the Linux (arm64) version from factorio.com and open it in the app."
+        },
+        {
+          "title": "Play",
+          "text": "The app sets up a graphics driver for your phone and starts the game."
+        }
+      ]
+    },
+    "screens": {
+      "heading": "Screenshots",
+      "open": "Open the screenshot",
+      "close": "Close",
+      "playing": "Playing with the on-screen controller",
+      "home": "The home screen",
+      "importing": "Importing the game",
+      "driver": "Choosing a graphics driver"
+    }
+  },
+  "phones": {
+    "title": "Phones that play Factorio with Pocket Foundry",
+    "description": "Which Android phones play Factorio with Pocket Foundry, and the graphics driver each GPU gets.",
+    "heading": "Phones",
+    "lead": "Pocket Foundry picks a graphics driver for your phone's GPU by itself and checks it before the first game.",
+    "gpus": {
+      "heading": "What each GPU gets",
+      "gpu": "GPU",
+      "driver": "Picked first",
+      "fallback": "If it can't play, the app moves on by itself: the next driver for your GPU, then the Phone's driver, then MobileGlues, then the CPU."
+    },
+    "list": {
+      "heading": "Reported working",
+      "search": "Search by phone, GPU or driver",
+      "placeholder": "Galaxy, Mali-G615, Turnip…",
+      "phone": "Phone",
+      "gpu": "GPU",
+      "driver": "Driver",
+      "notes": "FPS and notes",
+      "issue": "Report #{number}",
+      "count": "{shown} of {total} phones",
+      "empty": "No phone matches.",
+      "source": "From players' reports, and tests on remote test phones."
+    },
+    "report": "Tried it on a phone that isn't listed? Open an issue on GitHub with the app's Logs."
+  },
+  "guide": {
+    "title": "Playing Factorio on Android: controls and settings",
+    "description": "How to play Factorio on Android with Pocket Foundry: touch controls, controllers, keyboards, settings, updates, game files and saves.",
+    "heading": "Guide",
+    "lead": "Touch controls, controllers, settings and saves."
+  },
+  "faq": {
+    "title": "Pocket Foundry questions and answers",
+    "description": "Answers about Pocket Foundry: buying Factorio, phones, offline play, Space Age, mods, controllers and updates.",
+    "heading": "FAQ",
+    "items": [
+      {
+        "q": "Is this an Android port of Factorio?",
+        "a": "No. Pocket Foundry is a launcher: the game it runs is the Linux ARM64 build from factorio.com, without emulation. The app doesn't include any part of the game, and it isn't made by Wube."
+      },
+      {
+        "q": "Do I need to buy Factorio?",
+        "a": "Not to try it: the free demo works too. For the full game, buy it on factorio.com, or on Steam and link your Steam account on factorio.com. Either way, the file you import is the Linux (arm64) download from factorio.com."
+      },
+      {
+        "q": "Is Pocket Foundry free?",
+        "a": "Yes. It's open source under the GPL-3.0, with no ads and no tracking."
+      },
+      {
+        "q": "Which phones does it run on?",
+        "a": "Android 10 or later. Phones with a Snapdragon (Adreno 6xx or newer) run it best; the Phones page lists the others people have tried."
+      },
+      {
+        "q": "Does it need the internet?",
+        "a": "On the first start, to download the driver for your GPU. After that, the game plays offline."
+      },
+      {
+        "q": "Does Space Age work?",
+        "a": "Yes. It needs more memory than the base game, so on phones with less of it, set Sprite quality to Medium."
+      },
+      {
+        "q": "Can I use mods?",
+        "a": "Yes. They run the same Lua as on a computer. Add a mod's zip to Pocket Foundry's folder in the phone's Files app."
+      },
+      {
+        "q": "Can I play with a controller or a keyboard?",
+        "a": "Yes. USB and Bluetooth controllers (Xbox, PlayStation, Switch Pro, 8BitDo) and keyboards with a mouse work, and the on-screen controls step aside."
+      },
+      {
+        "q": "How do I get updates?",
+        "a": "With Obtainium, which installs each new version from GitHub, or by downloading it from GitHub's Releases."
+      },
+      {
+        "q": "Something doesn't work. Where do I report it?",
+        "a": "Open an issue on GitHub with what the app's Logs screen shows: its Copy button takes it all."
+      }
+    ]
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "There's no page at this address.",
+    "heading": "Nothing here",
+    "lead": "The link may be old, or mistyped.",
+    "back": "Go to the home page"
+  },
+  "footer": {
+    "issues": "Report a problem",
+    "releases": "Releases"
+  },
+  "badges": {
+    "heading": "Buttons",
+    "pocketFoundry": "Pocket Foundry",
+    "noEmulation": "No emulation",
+    "gpl": "Free software, GPL-3.0",
+    "android": "Android 10 and up",
+    "obtainium": "Get it with Obtainium",
+    "fps": "Best viewed at 60 FPS",
+    "blender": "Rendered in Blender",
+    "noTracking": "No tracking, no cookies"
+  }
+}
