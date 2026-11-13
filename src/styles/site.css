@@ -24,7 +24,7 @@
   --select: #ffd479;
   --serif: 'Chakra Petch', 'Chakra Petch fallback', 'Arial Narrow', Arial, sans-serif;
   --sans: 'Barlow', 'Barlow fallback', system-ui, sans-serif;
-  --tech: 'Share Tech Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --tech: 'PF Tech Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   --bolt: linear-gradient(135deg, #b4bcc5 0 38%, #5d646c 38% 62%, #0e1012 62%);
   --bolts:
     var(--bolt) left 5px top 5px / 5px 5px no-repeat, var(--bolt) right 5px top 5px / 5px 5px no-repeat,
@@ -38,11 +38,11 @@
     linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 10px 10px;
 }
 
-/* Cut down to the characters the site shows by scripts/subset-fonts.py; all OFL-1.1, from fontsource. */
+/* Cut down to the characters the site shows by scripts/subset-fonts.py; OFL-1.1, licences in src/assets/fonts/. */
 @font-face { font-family: 'Barlow'; font-style: normal; font-weight: 400; font-display: swap; src: url('../assets/fonts/barlow-400.woff2') format('woff2'); }
 @font-face { font-family: 'Barlow'; font-style: normal; font-weight: 600; font-display: swap; src: url('../assets/fonts/barlow-600.woff2') format('woff2'); }
 @font-face { font-family: 'Chakra Petch'; font-style: normal; font-weight: 700; font-display: swap; src: url('../assets/fonts/chakra-petch-700.woff2') format('woff2'); }
-@font-face { font-family: 'Share Tech Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url('../assets/fonts/share-tech-mono-400.woff2') format('woff2'); }
+@font-face { font-family: 'PF Tech Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url('../assets/fonts/share-tech-mono-400.woff2') format('woff2'); }
 @font-face { font-family: 'Chakra Petch fallback'; src: local('Arial'); size-adjust: 102%; ascent-override: 96%; descent-override: 26%; line-gap-override: 0%; }
 @font-face { font-family: 'Barlow fallback'; src: local('Arial'); size-adjust: 94%; ascent-override: 106%; descent-override: 21%; line-gap-override: 0%; }
 

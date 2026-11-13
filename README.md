@@ -12,4 +12,10 @@ The website of [Pocket Foundry](https://github.com/JulioFerrero/pocket-foundry):
 - `scripts/subset-fonts.py`: the fonts cut down to the characters the site shows (see its first lines). Rerun it when
   the text gains new characters.
 
+## Licence
+
+GPL-3.0-only, like the app (`LICENSE`). The fonts in `src/assets/fonts/` are cut-down copies of Barlow, Chakra Petch
+and Share Tech Mono (renamed PF Tech Mono, as its reserved name asks), under the SIL Open Font License 1.1; their
+licences are next to them. The textures the art uses are Poly Haven's, CC0, and aren't in the repository.
+
 `.github/workflows/deploy.yml` publishes to GitHub Pages on every push to main, once a day and by hand.
