@@ -282,8 +282,8 @@
   {
     "phone": "Redmi 12C",
     "gpu": "Mali-G52",
-    "driver": "Phone's driver",
-    "notes": "30–50",
+    "driver": "MobileGlues",
+    "notes": "50–60",
     "issues": [
       71
     ]
