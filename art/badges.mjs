@@ -32,8 +32,6 @@ const BADGES = {
   fps: { frames: 44, delay: 2, still: 40 },  // 50 frames a second, as fast as a GIF goes: the button keeps its word
   blender: { frames: 24, delay: 10, still: 20 },
   'built-on': { frames: 60, delay: 10, still: 12 },
-  'own-copy': { frames: 32, delay: 8, still: 9 },
-  'view-source': { frames: 24, delay: 10, still: 0 },
 };
 
 const page = await (await chromium.launch({ channel: 'chrome' })).newPage();
@@ -94,22 +92,6 @@ const frames = await page.evaluate(
       px(x + 2, y + 1, 'rgba(0,0,0,0.35)');
       px(x + 1, y + 2, 'rgba(0,0,0,0.35)');
       px(x + 2, y + 2, 'rgba(0,0,0,0.35)');
-    }
-    /** A filled polygon with hard edges: every pixel whose centre is inside. */
-    function poly(points, colour) {
-      const xs = points.map((p) => p[0]);
-      const ys = points.map((p) => p[1]);
-      for (let y = Math.floor(Math.min(...ys)); y <= Math.ceil(Math.max(...ys)); y++) {
-        for (let x = Math.floor(Math.min(...xs)); x <= Math.ceil(Math.max(...xs)); x++) {
-          let inside = false;
-          for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
-            const [xi, yi] = points[i];
-            const [xj, yj] = points[j];
-            if (yi > y + 0.5 !== yj > y + 0.5 && x + 0.5 < ((xj - xi) * (y + 0.5 - yi)) / (yj - yi) + xi) inside = !inside;
-          }
-          if (inside) px(x, y, colour);
-        }
-      }
     }
     /** A little picture from rows of letters, each letter a colour of [palette]; a dot is nothing. */
     function stamp(rows, x, y, palette) {
@@ -559,71 +541,6 @@ const frames = await page.evaluate(
         if (typed.trim()) x = 12 + write(typed.trimEnd(), 12, 15, '#e4ffe9', { size: 8 }).width + 1 + (typed.endsWith(' ') ? 4 : 0);
         if (at < NAMES[which].length || at >= 18 || at % 4 < 2) rect(x, 15, 4, 5, '#5dff8f');
         for (let i = 0; i < 3; i++) rect(4 + i * 5, 25, 3, 2, i === which ? '#5dff8f' : '#1f4a2e');
-      },
-
-      // Proposal. The game is the player's own: a gear wheel dropping into a wooden chest, as an import does.
-      'own-copy'(f) {
-        dither(0, 0, W, H, ['#4a443d', '#38332e', '#25211e']);
-        grit(1, 1, 86, 29, 0.05, 11);
-        bevel('#9a9288', '#0c0a09');
-        rect(2, 2, 27, 27, '#14110f');
-        bevel('#0c0a09', '#6e675e', 1, 1, 29, 29);
-        // The chest, seen from in front and a little above: open, its lid standing behind.
-        const land = f >= 14 && f < 17 ? 1 : 0;
-        const CHEST = [
-          '..dddddddddddddddd..',
-          '.dmmmmmmmmmmmmmmmmd.',
-          '.dmllllllllllllllmd.',
-          '.dmmmmmmmmmmmmmmmmd.',
-          'kkkkkkkkkkkkkkkkkkkk',
-          'kxxxxxxxxxxxxxxxxxxk',
-          'kkkkkkkkkkkkkkkkkkkk',
-          'dllllllllsslllllllld',
-          'dmmmmmmmmssmmmmmmmmd',
-          'dmmmmmmmmmmmmmmmmmmd',
-          'dlllllllllllllllllld',
-          'dmmmmmmmmmmmmmmmmmmd',
-          'dmmmmmmmmmmmmmmmmmmd',
-          'dddddddddddddddddddd',
-        ];
-        const wood = { l: '#c98a4a', m: '#a0652e', d: '#5a3414', k: '#2a1808', x: '#0c0806', s: '#c9d0d6' };
-        const GEAR = ['.b.b.b.', 'bbbbbbb', '.bbkbb.', 'bbkkkbb', '.mmkmm.', 'mmmmmmm', '.d.d.d.'];
-        const brass = { b: '#ffd46a', m: '#d9a63a', d: '#8a6418', k: '#2a2010' };
-        // The gear falls from above the square into the chest's mouth, faster as it goes, and is gone.
-        const fall = f < 14 ? Math.round(-6 + 0.105 * f * f) : null;
-        stamp(CHEST.slice(0, 4), 5, 9 + land, wood);
-        if (fall !== null) {
-          c.save();
-          c.beginPath();
-          c.rect(2, 2, 27, 13 + 2);
-          c.clip();
-          stamp(GEAR, 12, fall, brass);
-          c.restore();
-        }
-        stamp(CHEST.slice(4), 5, 13 + land, wood);
-        if (f >= 14 && f < 18) for (const [dx, dy] of [[-2, -1], [3, -2], [8, -1]]) px(12 + dx + (f - 14) * Math.sign(dx - 2), 13 + dy - (f - 14), '#ffe9a3');
-        write('BRING YOUR OWN', 31, 6, '#e8e0d2', { shadow: '#0c0a09' });
-        write('FACTORIO', 31, 15, (a, b) => (b < 2 ? '#ffc56a' : b < 4 ? '#ff9f1c' : '#d97a08'), { size: 8, shadow: '#0c0a09' });
-      },
-
-      // Proposal. The 90s' own button: a grey window, and the page's source scrolling by in an editor.
-      'view-source'(f) {
-        rect(0, 0, W, H, '#c0c0c0');
-        bevel('#ffffff', '#3c3c3c');
-        rect(1, 29, 86, 1, '#808080');
-        rect(86, 1, 1, 29, '#808080');
-        rect(3, 3, 25, 25, '#10104a');
-        bevel('#3c3c3c', '#ffffff', 2, 2, 27, 27);
-        // Lines of code as coloured dashes, moving up a pixel a frame; the pattern is 24 rows, the loop 24 frames.
-        const CODE = [[0, 3, '#ff8a8a'], [4, 9, '#ffe98f'], [2, 5, '#8ad1ff'], [8, 8, '#e6e6e6'], [2, 12, '#e6e6e6'], [4, 6, '#9dff9d'], [2, 4, '#8ad1ff'], [0, 4, '#ff8a8a']];
-        for (let row = 0; row < 16; row++) {
-          const y = 4 + row * 3 - f;
-          const [indent, length, colour] = CODE[row % 8];
-          for (const yy of [y, y + 24]) if (yy >= 4 && yy < 27) rect(5 + indent, yy, Math.min(length, 21 - indent), 1, colour);
-        }
-        write('VIEW', 33, 4, '#10104a', { size: 8 });
-        write('SOURCE', 33, 12, '#10104a', { size: 8 });
-        write('ON GITHUB', 33, 21, '#5a5a5a');
       },
     };
 
