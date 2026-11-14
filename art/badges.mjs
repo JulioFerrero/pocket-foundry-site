@@ -1,8 +1,10 @@
 // The 88x31 buttons, the 90s web's kind, made the way those were: pixel by pixel, a few colours, dithered gradients,
 // one-pixel bevels and a small thing moving in each. Drawn frame by frame on a canvas in headless Chrome: the titles
 // in the Silkscreen pixel font snapped to whole pixels, the small print in a 3x5 font drawn here, the gear wheel and
-// the monkey head pre-rendered in Blender (art/badge_sprites.py). ffmpeg makes each loop a GIF with one palette and
-// no dithering of its own. Each also gets a still PNG, its best frame, for people who turn animations off.
+// the monkey head pre-rendered in Blender (art/badge_sprites.py). Other people's marks (the GPLv3 logo, the GNU head,
+// Obtainium's gem) are redrawn pixel by pixel over the originals, as rows of letters here; the site's README says
+// whose they are and under what terms. ffmpeg makes each loop a GIF with one palette and no dithering of its own,
+// looping for ever. Each also gets a still PNG, its best frame, for people who turn animations off.
 //   node art/badges.mjs   ->   public/badges/<name>.gif and <name>.png
 import { execFileSync } from 'node:child_process';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
@@ -16,19 +18,22 @@ const sprite = async (name, count) => {
   }
   return list;
 };
-const sprites = { gear: await sprite('gear', 12), monkey: await sprite('monkey', 24) };
+const sprites = { gear: await sprite('gear', 24), monkey: await sprite('monkey', 24) };
 
 // Each button: how many frames its loop has, how long a frame lasts (hundredths of a second, a GIF's unit), and
-// which frame is the still.
+// which frame is the still. A loop's last frame has to lead into its first: whatever moves is back where it began.
 const BADGES = {
-  'pocket-foundry': { frames: 36, delay: 8, still: 20 },
+  // 48 frames: two of the gear's quarter turns, so its last frame leads into its first.
+  'pocket-foundry': { frames: 48, delay: 8, still: 20 },
   'no-emulation': { frames: 24, delay: 8, still: 0 },
-  gpl: { frames: 16, delay: 10, still: 0 },
+  gpl: { frames: 40, delay: 8, still: 0 },
   android: { frames: 42, delay: 16, still: 0 },
-  obtainium: { frames: 24, delay: 10, still: 4 },
+  obtainium: { frames: 32, delay: 10, still: 0 },
   fps: { frames: 44, delay: 2, still: 40 },  // 50 frames a second, as fast as a GIF goes: the button keeps its word
   blender: { frames: 24, delay: 10, still: 20 },
-  'no-tracking': { frames: 24, delay: 8, still: 3 },
+  'built-on': { frames: 60, delay: 10, still: 12 },
+  'own-copy': { frames: 32, delay: 8, still: 9 },
+  'view-source': { frames: 24, delay: 10, still: 0 },
 };
 
 const page = await (await chromium.launch({ channel: 'chrome' })).newPage();
@@ -237,9 +242,12 @@ const frames = await page.evaluate(
             if (colour) px(x, y, colour);
           }
         }
-        c.drawImage(gear[f % 12], 1, 1);
-        // Sparks thrown off to the right, twice a loop.
-        for (const [start, vx, vy, y0] of [[2, 1.5, -1.1, 19], [5, 1.1, -1.5, 22], [20, 1.3, -1.3, 20], [23, 1.7, -0.8, 23], [25, 0.9, -1.6, 18]]) {
+        // The sprite is a quarter turn in 24 frames, the least that brings the teeth and the web's four holes back at
+        // once. Twelve frames on, so the still keeps the pose the app's icon has.
+        c.drawImage(gear[(f + 12) % 24], 1, 1);
+        // Sparks thrown off to the right, three times a loop; the last is out before the loop ends.
+        const sparks = [[2, 1.5, -1.1, 19], [5, 1.1, -1.5, 22], [20, 1.3, -1.3, 20], [23, 1.7, -0.8, 23], [25, 0.9, -1.6, 18], [37, 1.2, -1.4, 21], [40, 1.6, -0.9, 19]];
+        for (const [start, vx, vy, y0] of sparks) {
           const age = f - start;
           if (age < 0 || age > 5) continue;
           const x = Math.round(27 + vx * age);
@@ -248,7 +256,7 @@ const frames = await page.evaluate(
         }
         rivet(83, 3, '#dfe6ec', '#9aa4ad', '#4b535b');
         rivet(83, 25, '#dfe6ec', '#9aa4ad', '#4b535b');
-        // The glint: a slanted band of light that crosses the letters once a loop.
+        // The glint: a slanted band of light that crosses the letters once a loop, off them at both of its ends.
         const band = (f - 10) * 6 + 30;
         const lit = (x, y) => x + y >= band && x + y < band + 5;
         write('POCKET', 33, 6, (a, b, x, y) => (lit(x, y) ? '#fffbe6' : b < 2 ? '#ffe9a3' : b < 4 ? '#f2c14e' : '#c98f22'), { size: 8, shadow: '#1c1408' });
@@ -256,15 +264,17 @@ const frames = await page.evaluate(
       },
 
       // A warning plate, and under it a transport belt carrying gear wheels and plates: the real thing, running.
+      // The plate is flat, with no dither, grain or letter shadow, and its second line is yellow on black: at 88
+      // pixels anything else behind five-pixel letters reads as mud.
       'no-emulation'(f) {
-        dither(0, 0, W, 17, ['#ffd84f', '#f5bd2e', '#dfa01c']);
-        grit(1, 1, 86, 15, 0.03, 2);
+        rect(0, 0, W, 9, '#ffd43b');
         bevel('#fff3b8', '#3a2600');
         for (const x0 of [2, 81]) {
-          for (let y = 2; y < 15; y++) for (let x = x0; x < x0 + 5; x++) px(x, y, (x + y) % 6 < 3 ? '#17140c' : '#ffd84f');
+          for (let y = 2; y < 8; y++) for (let x = x0; x < x0 + 5; x++) px(x, y, (x + y) % 6 < 3 ? '#17140c' : '#ffd43b');
         }
-        write('NO EMULATION', 'centre', 3, '#17140c', { size: 8, shadow: '#ffe98f' });
-        write('100% NATIVE CODE', 'centre', 10, '#4f3604');
+        write('NO EMULATION', 'centre', 2, '#17140c', { size: 8 });
+        rect(1, 9, 86, 7, '#17140c');
+        write('100% NATIVE CODE', 'centre', 10, '#ffd43b');
         // The belt, seen from above: steel rails, rubber, yellow chevrons, two pixels along each frame.
         rect(1, 16, 86, 1, '#3a2600');
         rect(1, 17, 86, 1, '#9aa3ab');
@@ -297,29 +307,75 @@ const frames = await page.evaluate(
         rect(0, 30, 88, 1, '#3a2600');
       },
 
-      // A blueprint: the licence drawn in white line on the grid, selected by a marquee of marching ants.
+      // The GPLv3 logo (José Obed's, public domain) on a red plate, and the GNU head (Etienne Suvasa's) on its white
+      // paper: both redrawn here a pixel at a time over the originals from gnu.org/graphics. A light crosses the
+      // logo, and the gnu blinks.
       gpl(f) {
-        dither(0, 0, W, H, ['#1f63a3', '#164a7e', '#103b68']);
-        for (let x = 3; x < W; x += 4) rect(x, 1, 1, 29, x % 12 === 3 ? 'rgba(185,220,246,0.20)' : 'rgba(185,220,246,0.09)');
-        for (let y = 3; y < H; y += 4) rect(1, y, 86, 1, y % 12 === 3 ? 'rgba(185,220,246,0.20)' : 'rgba(185,220,246,0.09)');
-        bevel('#b9dcf6', '#b9dcf6');
-        bevel('#0b2a4a', '#0b2a4a', 1, 1, 86, 29);
-        const title = write('GPL-3.0', 'centre', 5, (a, b) => (b < 5 ? '#ffffff' : '#d5ebfb'), { size: 16, shadow: '#082340' });
-        // The ants: a dashed box round the title, its dashes walking clockwise.
-        const [x0, y0, x1, y1] = [title.x - 3, 3, title.x + title.width + 2, 17];
-        const path = [];
-        for (let x = x0; x < x1; x++) path.push([x, y0]);
-        for (let y = y0; y < y1; y++) path.push([x1, y]);
-        for (let x = x1; x > x0; x--) path.push([x, y1]);
-        for (let y = y1; y > y0; y--) path.push([x0, y]);
-        path.forEach(([x, y], i) => px(x, y, (((i - f) % 4) + 4) % 4 < 2 ? '#ffffff' : '#0b2a4a'));
-        // A dimension line under it, the way a drawing gives a measure.
-        const note = write('FREE SOFTWARE', 'centre', 22, '#9fd4f7', { shadow: '#082340' });
-        for (const [from, to, tip] of [[x0, note.x - 3, x0], [note.x + note.width + 2, x1, x1]]) {
-          rect(from, 24, to - from + 1, 1, '#6fb2df');
-          rect(tip, 22, 1, 5, '#b9dcf6');
-        }
-        px(x0 + 1, 23, '#6fb2df'); px(x0 + 1, 25, '#6fb2df'); px(x1 - 1, 23, '#6fb2df'); px(x1 - 1, 25, '#6fb2df');
+        dither(0, 0, W, H, ['#8a0808', '#740505', '#5a0202']);
+        grit(1, 1, 86, 29, 0.04, 3);
+        bevel('#e2695a', '#240000');
+        rect(2, 2, 27, 27, '#fbf9f3');
+        bevel('#240000', '#c9897e', 1, 1, 29, 29);
+        const GNU = [
+          '...kkkkkk.........kkkk...',
+          '.kkggggggkk......kkggggk.',
+          'kgggkkkkkk.......kkkkgggk',
+          'kggk......kkkkkkkk....kgk',
+          'kggk....kggggkkkkkkk..kgk',
+          'kggk..kggkkkkwkwkkk...kgk',
+          'kggkkkkkkkkwwkwwkkkkkkggk',
+          'kggkkkkkkwwwwwwwwk.kkkggk',
+          '.kgkkk...kwkkkwwkkk.kkgk.',
+          '..kkk....kwwkwwwkwk.kkk..',
+          '...kk....kwwwwwwwwkk.....',
+          '....k....kwwwwwwwkwwkk...',
+          '....k...kwwwwkkkwkkkk....',
+          '...kkkkkwwwwkwkwwwwk.....',
+          '...kk..kwwwwkwwwwwwk.....',
+          '.....d..kwwwwkwwwwkk.....',
+          '.....d..kwwwwwkwwwk......',
+          '......d..kwwwwwkkkk......',
+          '......d..kwwwwwwwk.......',
+          '.......d..kwwwwkkk.......',
+          '........d.kwwwwk.........',
+          '...........kwkwk.........',
+          '............kwgk.........',
+          '.............kk..........',
+        ];
+        stamp(GNU, 3, 4, { k: '#17151a', d: '#77747a', g: '#b4b1b5', w: '#ffffff' });
+        if (f === 30 || f === 31) { px(15, 13, '#ffffff'); px(19, 13, '#ffffff'); }
+        // The logo, 52 pixels of its 3693: r its red, w the white of its letters, the v and the 3.
+        const LOGO = [
+          '...............................................rrrr.',
+          '....rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrwwrwwwwwr',
+          '....rrrrrrrrrrrrrrrrrrrrrrrwrrrrrrrrrrrrwwrrwwwwwwwr',
+          '....rrwwwwwwrrwwwwwwwrwwrrrwrrrrrrrrrrwwrrrwwwwwwwwr',
+          '....rwwrrrrwwrwwrrrrwwwwrrwwrrrrrrrrwwrrrwwrrrwwwwr.',
+          '...rrwwrrrrwwrwwrrrrwwwwrrwwrrrrrrwwrrrrwwrrrrwwwr..',
+          '...rwwrrrrrrrwwrrrrwwwwrrrwwrrrrrwwrrrrwrrrrrwwwr...',
+          '...rwwrrrrrrrwwrrrrwwwwrrrwwrrrrwwrrrrrrrrrrwwwrrr..',
+          '...rwwrrrrrrrwwrrrrwwwwrrrwwrrrwwrrrrrrrrrrwwwwwwr..',
+          '..rrwwrrwwwwrwwwwwwwrwwrrrwwrrwwrrrrrrrrrrwwwwwwwr..',
+          '..rwwrrrrwwrwwrrrrrrwwrrrrwwrwwrrrrrrrrrrwrrrrwwwr..',
+          '..rwwrrrrwwrwwrrrrrrwwrrrrwwrwwrrrrrrrrrrrrrrwwwr...',
+          '..rwwrrrrwwrwwrrrrrrwwrrrrwwrwwrrrrrrrrrrrrrwwwr....',
+          '..rwwrrrrwwrwwrrrrrrwwrrrrrwrwwrrrrrrrrrrrwwwwr.....',
+          '.rrrwwwwwwrrwwrrrrrrwwwwwwrwrwwrrrrrrrrrrwwwwr......',
+          '.rrrrrrrrrrrrrrrrrrrrrrrrrrwrwwrrrrrrrrwwwwwr.......',
+          '.rrrrrrrrrrrrrrrrrrrrrrrrrrrrwwwwwwwwwwwwwrr........',
+          '.rrrrrrrrrrrrrrrrrrrrrrrrrrrrwwwwwwwwwwwrr..........',
+          'rrrrrrrrrrrrrrrrrrrrrrrrrrrrrwwwwwwwwwrr............',
+          'rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrwwwwwrrr..............',
+          '..............................rrrrr.................',
+        ];
+        const band = (f - 4) * 6 + 20;
+        LOGO.forEach((row, dy) => [...row].forEach((letter, dx) => {
+          const [x, y] = [33 + dx, 2 + dy];
+          const lit = x + y >= band && x + y < band + 5;
+          if (letter === 'r') px(x, y, lit ? '#ff5340' : '#cf0000');
+          else if (letter === 'w') px(x, y, '#ffffff');
+        }));
+        write('FREE SOFTWARE', 'centre', 24, '#ffd9d2', { shadow: '#240000', left: 33, right: 85 });
       },
 
       // A circuit board, and a phone on it counting the versions up: 10, 11, 12 ... and on.
@@ -384,48 +440,57 @@ const frames = await page.evaluate(
         }
       },
 
-      // A cluster of obtainium crystals, twinkling, and an arrow that says where to get the app.
+      // Obtainium's own mark, the gem with the arrow cut into it (from its icon, GPL-3.0 like the app), on the black
+      // of its "get it on" badge. A gleam crosses the gem and leaves a twinkle.
       obtainium(f) {
-        dither(0, 0, W, H, ['#7450b8', '#4f3288', '#2c1b52']);
+        dither(0, 0, W, H, ['#2a2140', '#1a142b', '#0c0a15']);
         grit(1, 1, 86, 29, 0.04, 5);
-        bevel('#c3a8ff', '#120a26');
-        // The rock they grow from.
-        poly([[2, 28], [4, 23], [9, 21], [20, 21], [25, 24], [27, 28]], '#1c1233');
-        poly([[4, 28], [6, 24], [10, 23], [19, 23], [23, 26], [24, 28]], '#2a1c47');
-        // Three crystals: each a lit face, a shaded face, and a bright edge between.
-        const crystal = (tip, left, right, footLeft, footRight, ridge, foot) => {
-          poly([tip, left, footLeft, foot, ridge], '#d9a8ff');
-          poly([tip, ridge, foot, footRight, right], '#8a3fd1');
-          poly([tip, left, ridge], '#f3dcff');
-          poly([tip, ridge, right], '#b266f0');
-        };
-        crystal([7, 9], [4, 13], [9, 14], [6, 24], [11, 24], [6.5, 14], [8.5, 24]);
-        crystal([22, 11], [19, 14], [25, 15], [18, 24], [23, 24], [21.5, 15.5], [20.5, 24]);
-        crystal([14.5, 2], [10, 8], [19, 8], [10, 25], [19, 25], [13.5, 9], [13.5, 25]);
-        for (let y = 9; y < 25; y++) px(13, y, '#fbf0ff');
-        px(18, 12, '#5a1f9a'); px(18, 16, '#5a1f9a'); px(17, 20, '#5a1f9a');
-        // Twinkles: four-pointed stars that open and close, each in its own time.
-        for (const [x, y, start] of [[11, 6, 0], [23, 13, 8], [5, 17, 15], [17, 20, 19]]) {
-          const age = (f - start + 24) % 24;
-          const size = [1, 2, 3, 2, 1][age] ?? 0;
+        bevel('#9384b8', '#040308');
+        const GEM = [
+          '..............ppp......',
+          '............ppppppq....',
+          '...........pppppqqqqq..',
+          '......ppp..ppppqqqqqqqq',
+          '...pppppp..ppqqqqqqqqqq',
+          '..ppppppp...qqqqqqqqqqq',
+          '..pppppppp..qqqqqqqqqq.',
+          '..pppppppq......qqqqii.',
+          '.ppppppqqq.....qqqqii..',
+          '.pppppqq.......qqiiii..',
+          'ppppqqqqq.....qqiiiii..',
+          'pppqqqqqqq....iiiiii...',
+          'pqqqqqqqqqqq..iiiiii...',
+          '..qqqqqqqqqiiiiiiii....',
+          '....qqqqqqiiiiiiiii....',
+          '......qqiiiiiiiiiii....',
+          '........iiiiiiiiii.....',
+          '.........iiiiiiiii.....',
+          '...........iiiiii......',
+          '.............iiii......',
+          '...............ii......',
+        ];
+        const band = (f - 3) * 4;
+        const [x0, y0] = [4, 5];
+        GEM.forEach((row, dy) => [...row].forEach((letter, dx) => {
+          if (letter === '.') return;
+          px(x0 + dx + 1, y0 + dy + 1, 'rgba(0,0,0,0.5)');
+        }));
+        GEM.forEach((row, dy) => [...row].forEach((letter, dx) => {
+          if (letter === '.') return;
+          const lit = dx + dy >= band && dx + dy < band + 4;
+          px(x0 + dx, y0 + dy, lit ? { p: '#e9d2ff', q: '#b98af0', i: '#7d54d6' }[letter] : { p: '#a463e6', q: '#7240c4', i: '#4428a8' }[letter]);
+        }));
+        // Twinkles: four-pointed stars that open and close, after the gleam has passed.
+        for (const [x, y, start] of [[24, 8, 14], [6, 9, 20], [19, 24, 23]]) {
+          const size = [1, 2, 3, 2, 1][f - start] ?? 0;
           if (!size) continue;
           for (let i = 1; i < size; i++) {
             for (const [dx, dy] of [[i, 0], [-i, 0], [0, i], [0, -i]]) px(x + dx, y + dy, i === 1 ? '#ffffff' : '#e9ccff');
           }
           px(x, y, '#ffffff');
         }
-        write('GET IT WITH', 30, 7, '#e6d6ff', { shadow: '#1c1038' });
-        write('OBTAINIUM', 30, 16, (a, b) => (b < 2 ? '#ffffff' : b < 4 ? '#eadcff' : '#c9a6ff'), { size: 8, shadow: '#120a26' });
-        // The download arrow, dropping into its tray.
-        const drop = [0, 0, 1, 2, 3, 3, 2, 1][Math.floor(f / 1.5) % 8];
-        const gold = '#ffd76a';
-        rect(81, 2 + drop, 2, 3, gold);
-        rect(79, 5 + drop, 6, 1, gold);
-        rect(80, 6 + drop, 4, 1, gold);
-        rect(81, 7 + drop, 2, 1, '#d9a63a');
-        rect(78, 12, 8, 1, gold);
-        px(78, 11, gold); px(85, 11, gold);
-        rect(79, 13, 8, 1, 'rgba(0,0,0,0.4)');
+        write('GET IT WITH', 32, 7, '#d8cdf0', { shadow: '#040308' });
+        write('OBTAINIUM', 32, 16, (a, b) => (b < 2 ? '#ffffff' : b < 4 ? '#eadcff' : '#c9a6ff'), { size: 8, shadow: '#040308' });
       },
 
       // An amber monitor, scan lines and all. The loop runs at 50 frames a second, the most a GIF can do.
@@ -475,44 +540,99 @@ const frames = await page.evaluate(
         px(84, 27, 'rgba(0,0,0,0.3)');
       },
 
-      // A radar that sweeps and finds nothing: nobody is following you here.
-      'no-tracking'(f) {
-        dither(0, 0, W, H, ['#22323c', '#17232b', '#0e171d']);
-        grit(1, 1, 86, 29, 0.08, 9);
-        bevel('#5f7f8f', '#04080b');
-        const [cx, cy, radius] = [15, 15, 12.5];
-        const sweep = (f / 24) * Math.PI * 2;
-        for (let y = 2; y < 29; y++) {
-          for (let x = 2; x < 29; x++) {
-            const [dx, dy] = [x - cx, y - cy];
-            const d = Math.hypot(dx, dy);
-            if (d > radius + 1) continue;
-            if (d > radius) { px(x, y, dy + dx < 0 ? '#03070a' : '#6f8f9f'); continue; }
-            const lag = (((sweep - Math.atan2(dy, dx)) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-            const ring = Math.abs(d - 6) < 0.5 || Math.abs(d - 11.5) < 0.6 || dx === 0 || dy === 0;
-            let colour = ring ? '#0f4a5c' : '#04161d';
-            if (d > 0.5) {
-              if (lag < 0.2) colour = '#d6fbff';
-              else if (lag < 0.6) colour = ring ? '#8ff0ff' : '#3fc4de';
-              else if (lag < 1.2) colour = ring ? '#3fc4de' : (x + y) % 2 ? '#1d7f97' : '#125a6c';
-              else if (lag < 2.0) colour = ring ? '#1d7f97' : (x + y) % 2 ? '#0b3b48' : '#04161d';
-            } else colour = '#d6fbff';
-            px(x, y, colour);
-          }
+      // A terminal that types what the app stands on, one name after another.
+      'built-on'(f) {
+        rect(0, 0, W, H, '#0b0f12');
+        rect(1, 1, 86, 8, '#28323a');
+        rect(1, 1, 86, 1, '#3d4a54');
+        rect(1, 9, 86, 1, '#000000');
+        bevel('#7b8892', '#000000');
+        write('BUILT ON', 4, 3, '#dbe4ea');
+        for (const [i, colour] of ['#ff6b5e', '#ffc94a', '#5dff8f'].entries()) rect(74 + i * 4, 4, 2, 2, colour);
+        // Twenty frames a name: typed a letter a frame, held, then the line cleared.
+        const NAMES = ['TERMUX:X11', 'MESA ZINK', 'LIBHYBRIS'];
+        const which = Math.floor(f / 20);
+        const at = f % 20;
+        const typed = at >= 18 ? '' : NAMES[which].slice(0, at + 1);
+        write('>', 4, 15, '#5dff8f', { size: 8 });
+        let x = 12;
+        if (typed.trim()) x = 12 + write(typed.trimEnd(), 12, 15, '#e4ffe9', { size: 8 }).width + 1 + (typed.endsWith(' ') ? 4 : 0);
+        if (at < NAMES[which].length || at >= 18 || at % 4 < 2) rect(x, 15, 4, 5, '#5dff8f');
+        for (let i = 0; i < 3; i++) rect(4 + i * 5, 25, 3, 2, i === which ? '#5dff8f' : '#1f4a2e');
+      },
+
+      // Proposal. The game is the player's own: a gear wheel dropping into a wooden chest, as an import does.
+      'own-copy'(f) {
+        dither(0, 0, W, H, ['#4a443d', '#38332e', '#25211e']);
+        grit(1, 1, 86, 29, 0.05, 11);
+        bevel('#9a9288', '#0c0a09');
+        rect(2, 2, 27, 27, '#14110f');
+        bevel('#0c0a09', '#6e675e', 1, 1, 29, 29);
+        // The chest, seen from in front and a little above: open, its lid standing behind.
+        const land = f >= 14 && f < 17 ? 1 : 0;
+        const CHEST = [
+          '..dddddddddddddddd..',
+          '.dmmmmmmmmmmmmmmmmd.',
+          '.dmllllllllllllllmd.',
+          '.dmmmmmmmmmmmmmmmmd.',
+          'kkkkkkkkkkkkkkkkkkkk',
+          'kxxxxxxxxxxxxxxxxxxk',
+          'kkkkkkkkkkkkkkkkkkkk',
+          'dllllllllsslllllllld',
+          'dmmmmmmmmssmmmmmmmmd',
+          'dmmmmmmmmmmmmmmmmmmd',
+          'dlllllllllllllllllld',
+          'dmmmmmmmmmmmmmmmmmmd',
+          'dmmmmmmmmmmmmmmmmmmd',
+          'dddddddddddddddddddd',
+        ];
+        const wood = { l: '#c98a4a', m: '#a0652e', d: '#5a3414', k: '#2a1808', x: '#0c0806', s: '#c9d0d6' };
+        const GEAR = ['.b.b.b.', 'bbbbbbb', '.bbkbb.', 'bbkkkbb', '.mmkmm.', 'mmmmmmm', '.d.d.d.'];
+        const brass = { b: '#ffd46a', m: '#d9a63a', d: '#8a6418', k: '#2a2010' };
+        // The gear falls from above the square into the chest's mouth, faster as it goes, and is gone.
+        const fall = f < 14 ? Math.round(-6 + 0.105 * f * f) : null;
+        stamp(CHEST.slice(0, 4), 5, 9 + land, wood);
+        if (fall !== null) {
+          c.save();
+          c.beginPath();
+          c.rect(2, 2, 27, 13 + 2);
+          c.clip();
+          stamp(GEAR, 12, fall, brass);
+          c.restore();
         }
-        write('NO TRACKING', 32, 4, '#ffffff', { shadow: '#04080b' });
-        write('NO COOKIES', 32, 11, '#8ff0ff', { shadow: '#04080b' });
-        // The read-out: a lamp that blinks green, and what the sweep found.
-        rect(32, 19, 52, 8, '#04080b');
-        bevel('#04080b', '#3a515e', 31, 18, 54, 10);
-        const lamp = f % 12 < 8;
-        rect(34, 21, 3, 3, lamp ? '#5dff8f' : '#14522a');
-        if (lamp) px(34, 21, '#d9ffe5');
-        write('0 FOUND', 40, 20, '#5dff8f');
-        if (f % 12 < 6) rect(70, 20, 3, 5, '#5dff8f');
+        stamp(CHEST.slice(4), 5, 13 + land, wood);
+        if (f >= 14 && f < 18) for (const [dx, dy] of [[-2, -1], [3, -2], [8, -1]]) px(12 + dx + (f - 14) * Math.sign(dx - 2), 13 + dy - (f - 14), '#ffe9a3');
+        write('BRING YOUR OWN', 31, 6, '#e8e0d2', { shadow: '#0c0a09' });
+        write('FACTORIO', 31, 15, (a, b) => (b < 2 ? '#ffc56a' : b < 4 ? '#ff9f1c' : '#d97a08'), { size: 8, shadow: '#0c0a09' });
+      },
+
+      // Proposal. The 90s' own button: a grey window, and the page's source scrolling by in an editor.
+      'view-source'(f) {
+        rect(0, 0, W, H, '#c0c0c0');
+        bevel('#ffffff', '#3c3c3c');
+        rect(1, 29, 86, 1, '#808080');
+        rect(86, 1, 1, 29, '#808080');
+        rect(3, 3, 25, 25, '#10104a');
+        bevel('#3c3c3c', '#ffffff', 2, 2, 27, 27);
+        // Lines of code as coloured dashes, moving up a pixel a frame; the pattern is 24 rows, the loop 24 frames.
+        const CODE = [[0, 3, '#ff8a8a'], [4, 9, '#ffe98f'], [2, 5, '#8ad1ff'], [8, 8, '#e6e6e6'], [2, 12, '#e6e6e6'], [4, 6, '#9dff9d'], [2, 4, '#8ad1ff'], [0, 4, '#ff8a8a']];
+        for (let row = 0; row < 16; row++) {
+          const y = 4 + row * 3 - f;
+          const [indent, length, colour] = CODE[row % 8];
+          for (const yy of [y, y + 24]) if (yy >= 4 && yy < 27) rect(5 + indent, yy, Math.min(length, 21 - indent), 1, colour);
+        }
+        write('VIEW', 33, 4, '#10104a', { size: 8 });
+        write('SOURCE', 33, 12, '#10104a', { size: 8 });
+        write('ON GITHUB', 33, 21, '#5a5a5a');
       },
     };
 
+    // Chrome keeps a canvas on the graphics card until it is first read back, and blends a translucent pixel a level
+    // off from how the processor does: the very first frame came out a shade different from the rest of its loop.
+    // So one frame is drawn and read before any is kept.
+    draw[Object.keys(BADGES)[0]](0);
+    canvas.toDataURL('image/png');
+    c.getImageData(0, 0, W, H);
     const out = {};
     for (const [name, { frames }] of Object.entries(BADGES)) {
       out[name] = [];
@@ -545,4 +665,4 @@ for (const [name, list] of Object.entries(frames)) {
   total += size;
   console.log(`public/badges/${name}.gif  ${list.length} frames  ${(size / 1024).toFixed(1)} kB`);
 }
-console.log(`all eight: ${(total / 1024).toFixed(1)} kB`);
+console.log(`on the site: ${(total / 1024).toFixed(1)} kB`);

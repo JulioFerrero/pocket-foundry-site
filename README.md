@@ -18,4 +18,14 @@ GPL-3.0-only, like the app (`LICENSE`). The fonts in `src/assets/fonts/` are cut
 and Share Tech Mono (renamed PF Tech Mono, as its reserved name asks), under the SIL Open Font License 1.1; their
 licences are next to them. The textures the art uses are Poly Haven's, CC0, and aren't in the repository.
 
+Three of the 88x31 buttons in `public/badges/` redraw other people's marks in pixels (`art/badges.mjs`):
+
+- `gpl`: the GPLv3 logo by José Obed, in the public domain, and the GNU head, copyright © 1992 Etienne Suvasa, under
+  the [Creative Commons Attribution-ShareAlike 2.0](https://creativecommons.org/licenses/by-sa/2.0/) licence (or the
+  Free Art License, or the GNU FDL 1.3), both from [gnu.org/graphics](https://www.gnu.org/graphics/). The head here
+  is a redrawing at 25 pixels, so `gpl.gif` and `gpl.png` are under CC BY-SA 2.0 as well. The GNU head is also a
+  trademark of the GNU Project; it is here to say the site and the app are under the GNU GPL.
+- `obtainium`: the gem of [Obtainium](https://github.com/ImranR98/Obtainium)'s icon, by ImranR98 and its
+  contributors, GPL-3.0.
+
 `.github/workflows/deploy.yml` publishes to GitHub Pages on every push to main, once a day and by hand.

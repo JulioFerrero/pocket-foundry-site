@@ -1,6 +1,6 @@
 """
 Tiny pre-rendered sprites for the 88x31 buttons (art/badges.mjs), each a seamless loop on a transparent ground:
-a brass gear wheel turning one tooth (12 frames) and Blender's monkey head looking from side to side (24 frames).
+a brass gear wheel turning a quarter turn (24 frames) and Blender's monkey head looking from side to side (24 frames).
 On the processor only: they are a few pixels across, and the GPU may be busy with a long render.
   blender -b -P art/badge_sprites.py   ->  art/out/badge-sprites/gear/01.png ..., gear-48/01.png ..., monkey/01.png ...
 """
@@ -127,9 +127,11 @@ def turn_gear(t):
     gear.rotation_euler[2] = -t * math.tau / TEETH
 
 
-render('gear', 12, 27, turn_gear)
-# The app icon's gear (art/icon.mjs), at 48 pixels: the badge's still pose, then on round a quarter turn (two teeth,
-# so the four holes come back where they started too) for the site's animated tab icon.
+# A quarter turn, two teeth: one tooth on, the teeth are back where they were but the web's four holes are halfway
+# between where they started, and a loop that ends there jumps.
+render('gear', 24, 27, lambda t: turn_gear(t * 2))
+# The app icon's gear (art/icon.mjs), at 48 pixels: the badge's still pose, then on round the same quarter turn for
+# the site's animated tab icon.
 render('gear-48', 24, 48, lambda t: turn_gear(8 / 12 + t * 2))
 gear.hide_render = True
 for child in gear.children:

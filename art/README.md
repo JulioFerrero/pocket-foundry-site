@@ -13,7 +13,9 @@ Blender 5.3, ffmpeg (Homebrew) and Node; run from the project's root.
 3. `node art/encode_sprites.mjs`: the loops as transparent videos (VP9 WebM, HEVC MP4 for Safari) and their stills,
    in `public/sprites/`.
 4. `blender -b -P art/badge_sprites.py` (the buttons' gear wheel and monkey head), then `node art/badges.mjs`: the
-   88x31 buttons in `public/badges/`, animated GIFs and stills.
+   88x31 buttons in `public/badges/`, animated GIFs and stills. The GPLv3 logo, the GNU head and
+   Obtainium's gem are redrawn in pixels inside `badges.mjs` from the originals (gnu.org/graphics, Obtainium's
+   `assets/graphics`); their terms are in the README's Licence section.
 5. `node art/icon.mjs ../pocketfoundry`: the app's icon from the buttons' gear wheel (rendered at 48 pixels in step 4),
    as vector drawables in the app's repository, with its store icon, and this site's icons, the tab's animated one
    (`public/favicon-frames.png`) from the gear's turn.

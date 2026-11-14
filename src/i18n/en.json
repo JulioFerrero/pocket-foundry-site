@@ -170,6 +170,8 @@
     "obtainium": "Get it with Obtainium",
     "fps": "Best viewed at 60 FPS",
     "blender": "Rendered in Blender",
-    "noTracking": "No tracking, no cookies"
+    "builtOn": "Built on Termux:X11, Mesa Zink and libhybris",
+    "ownCopy": "Bring your own Factorio: the game isn't included",
+    "viewSource": "View source on GitHub"
   }
 }
