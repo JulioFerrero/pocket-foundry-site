@@ -15,5 +15,6 @@ Blender 5.3, ffmpeg (Homebrew) and Node; run from the project's root.
 4. `blender -b -P art/badge_sprites.py` (the buttons' gear wheel and monkey head), then `node art/badges.mjs`: the
    88x31 buttons in `public/badges/`, animated GIFs and stills.
 5. `node art/icon.mjs ../pocketfoundry`: the app's icon from the buttons' gear wheel (rendered at 48 pixels in step 4),
-   as vector drawables in the app's repository, with its store icon, and this site's icons.
+   as vector drawables in the app's repository, with its store icon, and this site's icons, the tab's animated one
+   (`public/favicon-frames.png`) from the gear's turn.
 6. `node scripts/og.mjs`: the share image, from the sprites and the icon.

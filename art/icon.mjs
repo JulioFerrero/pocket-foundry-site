@@ -3,9 +3,9 @@
 // the adaptive icon becomes a vector drawable of its pixels, so it stays sharp at any size. The themed icon is the
 // same gear without pixels, projected from the sprite's model: launchers show it big and flat, where the pixel
 // silhouette was hard to look at. The notification's is the pixel silhouette; the store icon is the release icon,
-// 8x, and this site's icons too.
+// 8x, and this site's icons too, with its tab icon animated: the gear turning over a burning fire.
 //   node art/icon.mjs ../pocketfoundry   (the app's repository)
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { chromium } from 'playwright-core';
 import sharp from 'sharp';
@@ -13,11 +13,15 @@ import sharp from 'sharp';
 const APP = process.argv[2];
 if (!APP) throw new Error('usage: node art/icon.mjs <the app repository>');
 const N = 90; // the grid: the gear is 50 pixels of it with its outline, inside the adaptive icon's safe zone
-const gear = 'data:image/png;base64,' + (await readFile('art/out/badge-sprites/gear-48.png')).toString('base64');
+// The gear's 48-pixel turn; its first frame is the icon's pose.
+const SPRITES = 'art/out/badge-sprites/gear-48';
+const gears = await Promise.all((await readdir(SPRITES)).sort().map(async (f) => 'data:image/png;base64,' + (await readFile(join(SPRITES, f))).toString('base64')));
+const gear = gears[0];
 
 const browser = await chromium.launch({ channel: 'chrome' });
 const page = await browser.newPage();
-const layers = await page.evaluate(async ({ gear, N }) => {
+const layers = await page.evaluate(async ({ gears, N }) => {
+  const gear = gears[0];
   const load = (s) => new Promise((done) => { const i = new Image(); i.onload = () => done(i); i.src = s; });
   const canvas = () => { const c = document.createElement('canvas'); c.width = c.height = N; return c; };
   const pixels = (c) => Array.from(c.getContext('2d').getImageData(0, 0, N, N).data);
@@ -41,27 +45,37 @@ const layers = await page.evaluate(async ({ gear, N }) => {
   }
   let seed = 7;
   const rand = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
-  // Doom's fire, in the badge's fire colours: heat along the bottom; every pixel copies the one below it, a step to
-  // either side, cooled by 0 or 1 at random, so flames lick up about twice [levels] rows.
+  const flicker = () => Math.floor(rand() * 4) & 3;
+  // Doom's fire, in the badge's fire colours: heat along the bottom; each step every pixel copies the one below it, a
+  // step to either side, cooled by 0 or 1 at random ([pick] gives each pixel's 0-3), so flames lick up about twice
+  // [levels] rows.
   const FIRE = [null, '#3a1006', '#7a2008', '#c2410c', '#f07a14', '#ffb347', '#ffe07a', '#fff6c8'];
-  function fire(c, height) {
+  function flames(height) {
     const levels = Math.round(N * height / 2);
     const heat = new Array(N * N).fill(0);
     for (let x = 0; x < N; x++) heat[(N - 1) * N + x] = levels;
-    for (let step = 0; step < N * 4; step++) {
+    const step = (pick) => {
       for (let y = 1; y < N; y++) for (let x = 0; x < N; x++) {
-        const r = Math.floor(rand() * 4) & 3;
+        const r = pick(y * N + x);
         heat[(y - 1) * N + Math.min(N - 1, Math.max(0, x - r + 1))] = Math.max(0, heat[y * N + x] - (r & 1));
       }
-    }
-    const top = FIRE.length - 1;
-    for (let y = 0; y < N - 1; y++) for (let x = 0; x < N; x++) {
-      const v = heat[y * N + x] / levels;
-      if (v <= 0.04) continue;
-      c.fillStyle = FIRE[Math.max(1, Math.min(top, Math.ceil(Math.pow(v, 1.15) * top)))];
-      c.fillRect(x, y + 1, 1, 1);
-    }
-    c.fillStyle = FIRE[top]; c.fillRect(0, N - 1, N, 1);
+    };
+    const draw = (c) => {
+      const top = FIRE.length - 1;
+      for (let y = 0; y < N - 1; y++) for (let x = 0; x < N; x++) {
+        const v = heat[y * N + x] / levels;
+        if (v <= 0.04) continue;
+        c.fillStyle = FIRE[Math.max(1, Math.min(top, Math.ceil(Math.pow(v, 1.15) * top)))];
+        c.fillRect(x, y + 1, 1, 1);
+      }
+      c.fillStyle = FIRE[top]; c.fillRect(0, N - 1, N, 1);
+    };
+    return { step, draw };
+  }
+  function fire(c, height) {
+    const f = flames(height);
+    for (let step = 0; step < N * 4; step++) f.step(flicker);
+    f.draw(c);
   }
   // The hearth: dark, warmed from below.
   function hearth(c) {
@@ -101,6 +115,21 @@ const layers = await page.evaluate(async ({ gear, N }) => {
     const b = betaFore.getContext('2d'); b.drawImage(s, at + 2, at + 3); b.drawImage(sprite, at, at);
   }
   const release = canvas(); release.getContext('2d').drawImage(releaseBack, 0, 0); release.getContext('2d').drawImage(releaseFore, 0, 0);
+  // The release icon turning, for the site's tab: the fire's random numbers repeat each loop, so once it has burnt in
+  // (more steps than the fire is rows tall) it loops as exactly as the gear does.
+  const STEPS = 2; // fire steps a frame
+  const randoms = Array.from({ length: gears.length * STEPS }, () => Array.from({ length: N * N }, flicker));
+  const loop = flames(0.58);
+  let tick = 0;
+  const burn = () => { const r = randoms[tick++ % randoms.length]; loop.step((i) => r[i]); };
+  while (tick < randoms.length * 4) burn();
+  const turning = [];
+  for (const src of gears) {
+    for (let s = 0; s < STEPS; s++) burn();
+    const frame = canvas(); const c = frame.getContext('2d');
+    hearth(c); loop.draw(c); c.drawImage(await cutOut(src, [26, 16, 6, 255], 1.45), at, at);
+    turning.push(pixels(frame));
+  }
   // The gear's silhouette, from the render itself (no outline): its brass, the grey hub and the holes in its web left
   // open, and lone pixels either way cleaned up. Themed icons and the notification are one colour.
   const raw = canvas(); raw.getContext('2d').drawImage(await load(gear), at + 1, at + 1);
@@ -118,9 +147,9 @@ const layers = await page.evaluate(async ({ gear, N }) => {
   const silhouette = mask.flatMap((on) => (on ? [255, 255, 255, 255] : [0, 0, 0, 0]));
   return {
     releaseBack: pixels(releaseBack), releaseFore: pixels(releaseFore), betaBack: pixels(betaBack),
-    betaFore: pixels(betaFore), release: pixels(release), silhouette,
+    betaFore: pixels(betaFore), release: pixels(release), silhouette, turning,
   };
-}, { gear, N });
+}, { gears, N });
 await browser.close();
 
 const silhouette = layers.silhouette;
@@ -255,16 +284,21 @@ for (const [file, xml] of Object.entries(files)) {
   await writeFile(file, xml);
   console.log(`${file.slice(APP.length + 1)}: ${(xml.length / 1024).toFixed(1)} KB`);
 }
-// The store's icon (fastlane, read by F-Droid, the README and the website): the middle 64 pixels of the release icon,
-// what a launcher shows of it, at 8x.
-const icon = join(APP, 'fastlane/metadata/android/en-US/images/icon.png');
-await sharp(Buffer.from(layers.release), { raw: { width: N, height: N, channels: 4 } })
+// What a launcher shows of an icon: its middle 64 pixels, here at 8x.
+const shown = (px) => sharp(Buffer.from(px), { raw: { width: N, height: N, channels: 4 } })
   .extract({ left: 13, top: 13, width: 64, height: 64 })
-  .resize(512, 512, { kernel: 'nearest' }).png({ compressionLevel: 9 }).toFile(icon);
+  .resize(512, 512, { kernel: 'nearest' }).png({ compressionLevel: 9 });
+// The store's icon (fastlane, read by F-Droid, the README and the website): the release icon, shown.
+const icon = join(APP, 'fastlane/metadata/android/en-US/images/icon.png');
+await shown(layers.release).toFile(icon);
 console.log(`${icon.slice(APP.length + 1)}: 512x512`);
 // The site's: the same, for the header's name plate and the browsers' tabs and home screens.
 await sharp(icon).toFile('src/assets/icon.png');
 await sharp(icon).toFile('public/icon-512.png');
 await sharp(icon).resize(180, 180).png().toFile('public/apple-touch-icon.png');
 await sharp(icon).resize(32, 32).png().toFile('public/favicon-32.png');
-console.log('the site: src/assets/icon.png, public/icon-512.png, apple-touch-icon.png, favicon-32.png');
+// The tab icon's frames side by side, each made like favicon-32.png, for the site's layout to play.
+const frames = await Promise.all(layers.turning.map(async (px) => sharp(await shown(px).toBuffer()).resize(32, 32).png().toBuffer()));
+await sharp({ create: { width: 32 * frames.length, height: 32, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+  .composite(frames.map((input, i) => ({ input, left: 32 * i, top: 0 }))).png({ compressionLevel: 9 }).toFile('public/favicon-frames.png');
+console.log('the site: src/assets/icon.png, public/icon-512.png, apple-touch-icon.png, favicon-32.png, favicon-frames.png');

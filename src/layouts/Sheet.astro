@@ -62,5 +62,33 @@ const { t, locale } = useTranslations(Astro.currentLocale);
       // In the window layout the sheet is what scrolls: give it the keyboard, so the arrow keys move it from the start.
       if (!location.hash) document.getElementById('content').focus({ preventScroll: true });
     </script>
+    <script>
+      // The tab's icon, animated: the frames art/icon.mjs draws, 14 a second, swapped in by hand because Chrome and
+      // Safari show only the first frame of an animated icon file. Not while the tab is hidden, nor for people who turn
+      // animations off: they keep the still icon.
+      const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+      if (icon && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const strip = new Image();
+        strip.src = '/favicon-frames.png';
+        strip.decode().then(() => {
+          const size = strip.height;
+          const canvas = Object.assign(document.createElement('canvas'), { width: size, height: size });
+          const context = canvas.getContext('2d')!;
+          const frames = Array.from({ length: strip.width / size }, (_, i) => {
+            context.clearRect(0, 0, size, size);
+            context.drawImage(strip, -i * size, 0);
+            return canvas.toDataURL();
+          });
+          let frame = 0;
+          let timer: number | undefined;
+          const play = () => {
+            clearInterval(timer);
+            if (!document.hidden) timer = setInterval(() => (icon.href = frames[(frame = (frame + 1) % frames.length)]), 1000 / 14);
+          };
+          document.addEventListener('visibilitychange', play);
+          play();
+        }, () => {});
+      }
+    </script>
   </body>
 </html>
