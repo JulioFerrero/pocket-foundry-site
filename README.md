@@ -4,7 +4,7 @@ The website of [Pocket Foundry](https://github.com/JulioFerrero/pocket-foundry):
 (every string is a key in `src/i18n/en.json`).
 
 - `npm run dev`: the site on http://localhost:4321.
-- `npm run data`: the latest release, the phones tables, the guide, the screenshots and the icons, from the app's
+- `npm run data`: the latest release, the phones tables, the guide and the screenshots, from the app's
   repository (`APP_REPO=../pocket-foundry npm run data` reads a local checkout). The build only reads what it
   writes, and the deploy runs it first.
 - `npm run build`: the site in `dist/`.

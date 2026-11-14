@@ -4,7 +4,6 @@
 //   APP_REPO=../pocket-foundry npm run data   from a local checkout
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import sharp from 'sharp';
 
 const REPO = 'JulioFerrero/pocket-foundry';
 const RAW = `https://raw.githubusercontent.com/${REPO}/main`;
@@ -97,8 +96,4 @@ await writeFile('src/content/guide.en.md', guide(await source('docs/playing.md')
 for (const name of SCREENS) {
   await writeFile(`src/assets/screens/${name}.jpg`, await source(`${shots}/${name}.jpg`, true));
 }
-const icon = await source('fastlane/metadata/android/en-US/images/icon.png', true);
-await sharp(icon).resize(32, 32).png().toFile('public/favicon-32.png');
-await sharp(icon).resize(180, 180).png().toFile('public/apple-touch-icon.png');
-await sharp(icon).resize(512, 512).png().toFile('public/icon-512.png');
 console.log(`${phones.length} phones, ${gpus.length} GPU rows, release ${JSON.parse(await readFile('src/data/release.json', 'utf8')).version}`);
