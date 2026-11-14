@@ -1,7 +1,9 @@
 // Pocket Foundry's app icon, from the badge's gear wheel (art/badge_sprites.py renders it at 48 pixels): the gear over
 // a hearth's pixel fire for releases, and over a blueprint, lifted off it by a hard shadow, for betas. Each layer of
-// the adaptive icon becomes a vector drawable of its pixels, so it stays sharp at any size; the gear's silhouette
-// makes the themed icon and the notification's; the store icon is the release icon, 8x, and this site's icons too.
+// the adaptive icon becomes a vector drawable of its pixels, so it stays sharp at any size. The themed icon is the
+// same gear without pixels, projected from the sprite's model: launchers show it big and flat, where the pixel
+// silhouette was hard to look at. The notification's is the pixel silhouette; the store icon is the release icon,
+// 8x, and this site's icons too.
 //   node art/icon.mjs ../pocketfoundry   (the app's repository)
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -155,13 +157,64 @@ ${paths}
 `;
 }
 
+/**
+ * The themed icon: the sprite's gear without its pixels. art/badge_sprites.py's model (eight blunt teeth extruded 0.3,
+ * a steel hub standing 0.17 above the web, four holes) through its camera (orthographic, 28 degrees off straight down,
+ * scale 2.2, aimed 0.1 up) in the icon's pose (turned -30 degrees), projected to flat shapes where icon.mjs puts the
+ * 48-pixel sprite. Change one and change the other. One colour, so the 3D is in tones: the web solid, the hub's top
+ * lighter, the side walls lighter still.
+ */
+function gearIn3D({ wall = 0.5, hubTop = 0.7, ring = 64 } = {}) {
+  const tilt = (28 * Math.PI) / 180, scale = 2.2, aim = 0.1 * Math.sin(tilt), turn = -Math.PI / 6;
+  const project = ([x, y, z]) => {
+    const up = y * Math.cos(tilt) + z * Math.sin(tilt);
+    return [(21 + 24 + (x * 48) / scale) * 1.2, (21 + 24 - ((up - aim) * 48) / scale) * 1.2];
+  };
+  const turned = ([x, y]) => [x * Math.cos(turn) - y * Math.sin(turn), x * Math.sin(turn) + y * Math.cos(turn)];
+  const shape = (points) => `M${points.map((p) => p.map((v) => +v.toFixed(3)).join(',')).join('L')}Z`;
+  const circle = ([cx, cy], r, z, from = 0, to = 2 * Math.PI) => Array.from({ length: ring + 1 }, (_, k) => {
+    const a = from + ((to - from) * k) / ring;
+    return project([cx + r * Math.cos(a), cy + r * Math.sin(a), z]);
+  });
+  const outline = [];
+  for (let i = 0; i < 8; i++) for (const [o, r] of [[-0.3, 0.72], [-0.2, 1], [0.2, 1], [0.3, 0.72]]) {
+    const a = ((i + o) / 8) * 2 * Math.PI;
+    outline.push(turned([Math.cos(a) * r, Math.sin(a) * r]));
+  }
+  // The side walls that face the camera: drawn first, the web over them. All wind the same way, so one path fills
+  // their union at one tone.
+  const walls = outline.map((p, i) => {
+    const q = outline[(i + 1) % outline.length];
+    return q[0] - p[0] > 0 ? shape([project([...p, 0.3]), project([...q, 0.3]), project([...q, 0]), project([...p, 0])]) : '';
+  }).join('');
+  const holes = [0, 1, 2, 3].map((i) => {
+    const a = ((i + 0.5) / 4) * 2 * Math.PI;
+    return shape(circle(turned([Math.cos(a) * 0.5, Math.sin(a) * 0.5]), 0.13, 0.3));
+  }).join('');
+  // The hub: its outline is cut out of the web (even-odd, with the holes), then filled by its top and its front side.
+  const front = circle([0, 0], 0.26, 0.3, Math.PI, 2 * Math.PI);
+  const hub = shape([...front, ...circle([0, 0], 0.26, 0.47, 0, Math.PI)]);
+  const side = shape([...front, ...circle([0, 0], 0.26, 0.47, 2 * Math.PI, Math.PI)]);
+  const path = (d, alpha, more = '') => `    <path android:fillColor="#FFFFFF"${alpha < 1 ? ` android:fillAlpha="${alpha}"` : ''}${more} android:pathData="${d}" />`;
+  return `<?xml version="1.0" encoding="utf-8"?>
+<!-- Themed icons: the gear wheel in one colour, its 3D in tones. Made by pocketfoundry-site's art/icon.mjs. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+${path(walls, wall)}
+${path(shape(outline.map(([x, y]) => project([x, y, 0.3]))) + hub + holes, 1, ' android:fillType="evenOdd"')}
+${path(side, wall)}
+${path(shape(circle([0, 0], 0.26, 0.47)), hubTop)}
+</vector>
+`;
+}
+
 const res = join(APP, 'app/src/main/res/drawable');
 const beta = join(APP, 'app/src/beta/res/drawable');
 await mkdir(beta, { recursive: true });
 const files = {
   [join(res, 'ic_launcher_background.xml')]: vector(layers.releaseBack, N, { note: "The icon's hearth: a pixel fire under the gear." }),
   [join(res, 'ic_launcher_foreground.xml')]: vector(layers.releaseFore, N, { note: "The icon's brass gear wheel." }),
-  [join(res, 'ic_launcher_monochrome.xml')]: vector(silhouette, N, { note: 'Themed icons: the gear wheel in one colour.' }),
+  [join(res, 'ic_launcher_monochrome.xml')]: gearIn3D(),
   [join(beta, 'ic_launcher_background.xml')]: vector(layers.betaBack, N, { note: "Betas' icon: the gear on a blueprint." }),
   [join(beta, 'ic_launcher_foreground.xml')]: vector(layers.betaFore, N, { note: "Betas' icon: the gear wheel and its shadow." }),
 };
