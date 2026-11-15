@@ -80,7 +80,7 @@
       "heading": "What each GPU gets",
       "gpu": "GPU",
       "driver": "Picked first",
-      "fallback": "If it can't play, the app moves on by itself: the next driver for your GPU, then the Phone's driver, then MobileGlues, then the CPU."
+      "fallback": "If it can't play, the app moves on by itself: the next driver for your GPU, then Phone's Vulkan, then Phone's OpenGL ES, then the CPU."
     },
     "list": {
       "heading": "Reported working",
