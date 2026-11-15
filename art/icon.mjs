@@ -176,7 +176,22 @@ function vector(px, w, { dp = 108, from = [0, 0, w, px.length / 4 / w], note }) 
       x = end;
     }
   }
-  const paths = [...runs].map(([colour, d]) => `    <path android:fillColor="${colour}" android:pathData="${d}" />`).join('\n');
+  // Android's resource compiler stores no string over 32,767 characters: it writes STRING_TOO_LARGE, and the icon
+  // fails to load (the game screen crashed on the betas' blueprint). An opaque colour splits into paths at its runs;
+  // a see-through one can't, as two paths would darken where runs overlap.
+  const LONGEST = 30000;
+  const pieces = (colour, d) => {
+    if (d.length <= LONGEST) return [d];
+    if (colour.length > 7) throw new Error(`${note} ${colour}: a see-through path over ${LONGEST} characters`);
+    const out = [''];
+    for (const run of d.split(/(?=M)/)) {
+      if (out[out.length - 1].length + run.length > LONGEST) out.push('');
+      out[out.length - 1] += run;
+    }
+    return out;
+  };
+  const paths = [...runs].flatMap(([colour, d]) => pieces(colour, d)
+    .map((part) => `    <path android:fillColor="${colour}" android:pathData="${part}" />`)).join('\n');
   return `<?xml version="1.0" encoding="utf-8"?>
 <!-- ${note} Made by pocketfoundry-site's art/icon.mjs, from the 88x31 badge's gear wheel. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
