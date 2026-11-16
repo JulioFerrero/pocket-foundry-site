@@ -53,7 +53,8 @@ function table(markdown, heading) {
   return rows.slice(2); // header and separator
 }
 
-const issues = (cell) => [...cell.matchAll(/\[#(\d+)\]/g)].map((match) => Number(match[1]));
+/** A cell's first link: where its row comes from, an issue or another page. */
+const link = (cell) => cell.match(/\]\((https?:\/\/[^)\s]+)\)/)?.[1] ?? null;
 const plain = (cell) =>
   cell
     .replace(/\(\[#\d+\]\([^)]*\)(, \[#\d+\]\([^)]*\))*\)/g, '')
@@ -82,7 +83,7 @@ const phones = table(phonesMd, '## Reported working').map(([phone, gpu, driver, 
   gpu: plain(gpu),
   driver: plain(driver),
   notes: plain(fps),
-  issues: issues(fps),
+  link: link(fps),
 }));
 
 await mkdir('src/data', { recursive: true });

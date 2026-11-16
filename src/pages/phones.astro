@@ -44,12 +44,7 @@ const { t } = useTranslations(Astro.currentLocale);
             <th scope="row">{row.phone}</th>
             <td>{row.gpu}</td>
             <td>{row.driver}</td>
-            <td>
-              {row.notes}
-              {row.issues.map((number) => (
-                <> <a href={links.issue(number)}>{t('phones.list.issue', { number })}</a></>
-              ))}
-            </td>
+            <td>{row.link ? <a href={row.link}>{row.notes}</a> : row.notes}</td>
           </tr>
         ))}
       </tbody>

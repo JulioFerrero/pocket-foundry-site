@@ -90,7 +90,6 @@
       "gpu": "GPU",
       "driver": "Driver",
       "notes": "FPS and notes",
-      "issue": "Report #{number}",
       "count": "{shown} of {total} phones",
       "empty": "No phone matches.",
       "source": "From players' reports, and tests on remote test phones."

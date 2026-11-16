@@ -21,10 +21,10 @@
   },
   {
     "gpu": "Other Malis, PowerVR and other GPUs with Vulkan 1.1",
-    "driver": "The Phone's driver"
+    "driver": "Phone's Vulkan"
   },
   {
     "gpu": "GPUs without Vulkan 1.1 (Adreno 5xx and older)",
-    "driver": "MobileGlues"
+    "driver": "Phone's OpenGL ES"
   }
 ]
