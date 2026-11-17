@@ -121,7 +121,7 @@
       },
       {
         "q": "Which phones does it run on?",
-        "a": "Android 10 or later. Phones with a Snapdragon (Adreno 6xx or newer) run it best; the Phones page lists the others people have tried."
+        "a": "Android 10 or later. Phones with a Mali (MediaTek, Tensor), Adreno 6xx or newer (Snapdragon), Xclipse (Exynos) or PowerVR (Pixel 10) GPU all play; the Phones page lists every phone people have tried, its driver and FPS."
       },
       {
         "q": "Does it need the internet?",
